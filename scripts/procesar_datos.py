@@ -265,7 +265,25 @@ comparacion = pd.merge(df_proyectos,resultado_real,on="Proyecto",how="outer")
 # ==================================
  
 def coincidencias(lista1,lista2):
- 
+ def coincidencias_inteligente(lista_teorica, lista_real):
+
+    if pd.isna(lista_teorica) or pd.isna(lista_real):
+        return ""
+
+    teoricas = set([pd.to_datetime(x.strip()) for x in str(lista_teorica).split(",")])
+    reales = set([pd.to_datetime(x.strip()) for x in str(lista_real).split(",")])
+
+    coincidencias = []
+
+    for fecha_real in reales:
+
+        if fecha_real in teoricas:
+            coincidencias.append(fecha_real)
+
+        elif (fecha_real - pd.Timedelta(days=1)) in teoricas:
+            coincidencias.append(fecha_real - pd.Timedelta(days=1))
+
+    return ", ".join(sorted([f.strftime("%Y-%m-%d") for f in coincidencias]))
     if pd.isna(lista1) or pd.isna(lista2):
         return ""
  
@@ -277,11 +295,11 @@ def coincidencias(lista1,lista2):
     return ", ".join(inter)
  
 comparacion["Coincidencias_Intermedia"] = comparacion.apply(
-lambda row: coincidencias(row["PosibleIntermedia"],row["Fechas_Intermedia"]),axis=1
+lambda row: coincidencias_inteligente(row["PosibleIntermedia"], row["Fechas_Intermedia"]), axis=1
 )
- 
+
 comparacion["Coincidencias_Semanal"] = comparacion.apply(
-lambda row: coincidencias(row["PosibleSemanal"],row["Fechas_Semanal"]),axis=1
+lambda row: coincidencias_inteligente(row["PosibleSemanal"], row["Fechas_Semanal"]), axis=1
 )
  
 # ==================================
@@ -422,3 +440,4 @@ if GRAFICO_DISPONIBLE:
     print("Gráfico generado correctamente")
  
 print("Archivos generados correctamente")
+Ajuste: lógica de coincidencias considerando cierre tardío de reuniones
