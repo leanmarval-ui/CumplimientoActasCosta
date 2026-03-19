@@ -58,9 +58,14 @@ df_semanal = pd.read_excel(archivo, sheet_name="ReunionesSemanales")
 # NORMALIZAR PROYECTO
 # ==================================
  
-df_proyectos["Proyecto"] = df_proyectos["Proyecto"].str.upper()
-df_intermedia["Proyecto"] = df_intermedia["Proyecto"].str.upper()
-df_semanal["Proyecto"] = df_semanal["Proyecto"].str.upper()
+def limpiar_texto(texto):
+    if pd.isna(texto):
+        return texto
+    return str(texto).strip().upper()
+
+df_proyectos["Proyecto"] = df_proyectos["Proyecto"].apply(limpiar_texto)
+df_intermedia["Proyecto"] = df_intermedia["Proyecto"].apply(limpiar_texto)
+df_semanal["Proyecto"] = df_semanal["Proyecto"].apply(limpiar_texto)
  
 # ==================================
 # MAPA DIAS
