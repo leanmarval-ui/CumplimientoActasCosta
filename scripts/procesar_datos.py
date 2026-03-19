@@ -263,43 +263,39 @@ comparacion = pd.merge(df_proyectos,resultado_real,on="Proyecto",how="outer")
 # ==================================
 # COINCIDENCIAS
 # ==================================
- 
-def coincidencias(lista1,lista2):
- def coincidencias_inteligente(lista_teorica, lista_real):
 
-    if pd.isna(lista_teorica) or pd.isna(lista_real):
+def coincidencias_inteligente(lista1, lista2):
+
+    if pd.isna(lista1) or pd.isna(lista2):
         return ""
 
-    teoricas = set([pd.to_datetime(x.strip()) for x in str(lista_teorica).split(",")])
-    reales = set([pd.to_datetime(x.strip()) for x in str(lista_real).split(",")])
+    fechas1 = [pd.to_datetime(x.strip()) for x in str(lista1).split(",") if x.strip() != ""]
+    fechas2 = [pd.to_datetime(x.strip()) for x in str(lista2).split(",") if x.strip() != ""]
 
     coincidencias = []
 
-    for fecha_real in reales:
+    for f1 in fechas1:
+        for f2 in fechas2:
 
-        if fecha_real in teoricas:
-            coincidencias.append(fecha_real)
+            # Coincidencia exacta
+            if f1 == f2:
+                coincidencias.append(f1)
 
-        elif (fecha_real - pd.Timedelta(days=1)) in teoricas:
-            coincidencias.append(fecha_real - pd.Timedelta(days=1))
+            # Caso cierre tardío (ej: martes → miércoles)
+            elif f2 == f1 + pd.Timedelta(days=1):
+                coincidencias.append(f1)
 
-    return ", ".join(sorted([f.strftime("%Y-%m-%d") for f in coincidencias]))
-    if pd.isna(lista1) or pd.isna(lista2):
-        return ""
- 
-    set1 = set([x.strip() for x in str(lista1).split(",")])
-    set2 = set([x.strip() for x in str(lista2).split(",")])
- 
-    inter = sorted(set1.intersection(set2))
- 
-    return ", ".join(inter)
- 
+    coincidencias = sorted(set(coincidencias))
+
+    return ", ".join([f.strftime("%Y-%m-%d") for f in coincidencias])
+
+
 comparacion["Coincidencias_Intermedia"] = comparacion.apply(
-lambda row: coincidencias_inteligente(row["PosibleIntermedia"], row["Fechas_Intermedia"]), axis=1
+    lambda row: coincidencias_inteligente(row["PosibleIntermedia"], row["Fechas_Intermedia"]), axis=1
 )
 
 comparacion["Coincidencias_Semanal"] = comparacion.apply(
-lambda row: coincidencias_inteligente(row["PosibleSemanal"], row["Fechas_Semanal"]), axis=1
+    lambda row: coincidencias_inteligente(row["PosibleSemanal"], row["Fechas_Semanal"]), axis=1
 )
  
 # ==================================
