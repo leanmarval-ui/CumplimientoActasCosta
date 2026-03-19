@@ -440,4 +440,4 @@ if GRAFICO_DISPONIBLE:
     print("Gráfico generado correctamente")
  
 print("Archivos generados correctamente")
-Ajuste: lógica de coincidencias considerando cierre tardío de reuniones
+# Ajuste: lógica de coincidencias considerando cierre tardío de reuniones
