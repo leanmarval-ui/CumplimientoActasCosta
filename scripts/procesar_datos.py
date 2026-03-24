@@ -386,47 +386,77 @@ if GRAFICO_DISPONIBLE:
     y = np.arange(len(proyectos))
     h = 0.32
 
-    fig, ax = plt.subplots(figsize=(13,max(6,len(proyectos)*0.6)))
+    fig, ax = plt.subplots(figsize=(13, max(6, len(proyectos)*0.6)))
 
+    # BARRAS SIN BORDE + TRANSPARENCIA
     bars1 = ax.barh(
-        y-h/2,
+        y - h/2,
         df_grafico["CumplimientoSemanal"],
         h,
         color=[color(v) for v in df_grafico["CumplimientoSemanal"]],
         edgecolor="none",
+        alpha=0.85,
         label="Reunión Semanal"
     )
 
     bars2 = ax.barh(
-        y+h/2,
+        y + h/2,
         df_grafico["CumplimientoIntermedia"],
         h,
         color=[color(v) for v in df_grafico["CumplimientoIntermedia"]],
         edgecolor="none",
+        alpha=0.85,
         label="Reunión Intermedia"
     )
- 
-    ax.axvline(80,linestyle="--",color="black",label="Meta 80%")
- 
+
+    # TEXTO DENTRO DE LAS BARRAS (IZQUIERDA, NO SE PISAN)
+    for bar in bars1:
+        width = bar.get_width()
+        ax.text(
+            5,
+            bar.get_y() + bar.get_height()/2,
+            f"Semanal",
+            va="center",
+            ha="left",
+            fontsize=8,
+            color="white"
+        )
+
+    for bar in bars2:
+        width = bar.get_width()
+        ax.text(
+            5,
+            bar.get_y() + bar.get_height()/2,
+            f"Intermedia",
+            va="center",
+            ha="left",
+            fontsize=8,
+            color="white"
+        )
+
+    # LÍNEA META
+    ax.axvline(80, linestyle="--", color="black", label="Meta 80%")
+
+    # EJES
     ax.set_yticks(y)
     ax.set_yticklabels(proyectos)
- 
-    ax.set_xlim(0,105)
- 
+
+    ax.set_xlim(0, 105)
+
     ax.set_xlabel("Cumplimiento (%)")
-    ax.set_title("Cumplimiento de Reuniones por Proyecto",fontsize=14,fontweight="bold")
- 
-    ax.grid(axis="x",linestyle="--",alpha=0.4)
- 
+    ax.set_title("Cumplimiento de Reuniones por Proyecto", fontsize=14, fontweight="bold")
+
+    ax.grid(axis="x", linestyle="--", alpha=0.4)
+
     ax.legend()
- 
+
     plt.tight_layout()
- 
-    plt.savefig("output/grafico_cumplimiento_proyectos.png",dpi=300)
- 
+
+    plt.savefig("output/grafico_cumplimiento_proyectos.png", dpi=300)
+
     plt.close()
- 
+
     print("Gráfico generado correctamente")
- 
+
 print("Archivos generados correctamente")
 # Ajuste: lógica de coincidencias considerando cierre tardío de reuniones
