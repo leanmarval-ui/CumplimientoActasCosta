@@ -274,8 +274,17 @@ def coincidencias_inteligente(lista1, lista2):
     if pd.isna(lista1) or pd.isna(lista2):
         return ""
 
-    fechas1 = sorted([pd.to_datetime(x.strip()) for x in str(lista1).split(",") if x.strip() != ""])
-    fechas2 = sorted([pd.to_datetime(x.strip()) for x in str(lista2).split(",") if x.strip() != ""])
+   fechas1 = sorted(set([
+    pd.to_datetime(x.strip()).normalize()
+    for x in str(lista1).split(",")
+    if x.strip() != ""
+]))
+
+fechas2 = sorted(set([
+    pd.to_datetime(x.strip()).normalize()
+    for x in str(lista2).split(",")
+    if x.strip() != ""
+]))
 
     coincidencias = []
 
@@ -323,16 +332,16 @@ comparacion["ConteoCoincidenciasSemanal"] = comparacion["Coincidencias_Semanal"]
 # ==================================
  
 comparacion["CumplimientoIntermedia"] = np.where(
-comparacion["ConteoIntermedia"] == 0,
-0,
-comparacion["ConteoCoincidenciasIntermedia"]/comparacion["ConteoIntermedia"]
-)
- 
+    comparacion["ConteoIntermedia"] == 0,
+    0,
+    comparacion["ConteoCoincidenciasIntermedia"]/comparacion["ConteoIntermedia"]
+).clip(upper=1)
+
 comparacion["CumplimientoSemanal"] = np.where(
-comparacion["ConteoSemanal"] == 0,
-0,
-comparacion["ConteoCoincidenciasSemanal"]/comparacion["ConteoSemanal"]
-)
+    comparacion["ConteoSemanal"] == 0,
+    0,
+    comparacion["ConteoCoincidenciasSemanal"]/comparacion["ConteoSemanal"]
+).clip(upper=1)
  
 # ==================================
 # GUARDAR RESULTADOS
