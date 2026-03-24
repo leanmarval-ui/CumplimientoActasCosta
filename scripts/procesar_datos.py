@@ -274,29 +274,27 @@ def coincidencias_inteligente(lista1, lista2):
     if pd.isna(lista1) or pd.isna(lista2):
         return ""
 
-   fechas1 = sorted(set([
-    pd.to_datetime(x.strip()).normalize()
-    for x in str(lista1).split(",")
-    if x.strip() != ""
-]))
+    fechas1 = sorted(set([
+        pd.to_datetime(x.strip()).normalize()
+        for x in str(lista1).split(",")
+        if x.strip() != ""
+    ]))
 
-fechas2 = sorted(set([
-    pd.to_datetime(x.strip()).normalize()
-    for x in str(lista2).split(",")
-    if x.strip() != ""
-]))
+    fechas2 = sorted(set([
+        pd.to_datetime(x.strip()).normalize()
+        for x in str(lista2).split(",")
+        if x.strip() != ""
+    ]))
 
     coincidencias = []
 
-    for f2 in fechas2:  
+    for f2 in fechas2:
         for f1 in fechas1:
 
-            # Coincidencia exacta
             if f2 == f1:
                 coincidencias.append(f1)
                 break
 
-            # Cierre tardío (1 día después)
             elif f2 == f1 + pd.Timedelta(days=1):
                 coincidencias.append(f1)
                 break
