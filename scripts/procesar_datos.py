@@ -389,36 +389,47 @@ if GRAFICO_DISPONIBLE:
  
     fig, ax = plt.subplots(figsize=(13,max(6,len(proyectos)*0.6)))
  
-    bars1 = ax.barh(
-        y-h/2,
-        df_grafico["CumplimientoSemanal"],
-        h,
-        color=[color(v) for v in df_grafico["CumplimientoSemanal"]],
-        edgecolor="#1f3a93",
-        linewidth=2,
-        label="Reunión Semanal"
-    )
+   bars1 = ax.barh(
+    y-h/2,
+    df_grafico["CumplimientoSemanal"],
+    h,
+    color=[color(v) for v in df_grafico["CumplimientoSemanal"]],
+    edgecolor="none",
+    label="Reunión Semanal"
+)
  
     bars2 = ax.barh(
-        y+h/2,
-        df_grafico["CumplimientoIntermedia"],
-        h,
-        color=[color(v) for v in df_grafico["CumplimientoIntermedia"]],
-        edgecolor="#145a32",
-        linewidth=2,
-        label="Reunión Intermedia"
-    )
+    y+h/2,
+    df_grafico["CumplimientoIntermedia"],
+    h,
+    color=[color(v) for v in df_grafico["CumplimientoIntermedia"]],
+    edgecolor="none",
+    label="Reunión Intermedia"
+)
  
-    for bars in [bars1,bars2]:
-        for bar in bars:
-            width = bar.get_width()
-            ax.text(
-                width + 1,
-                bar.get_y() + bar.get_height()/2,
-                f"{width:.0f}%",
-                va="center",
-                fontsize=9
-            )
+   for bar in bars1:
+    width = bar.get_width()
+    ax.text(
+        width/2,
+        bar.get_y() + bar.get_height()/2,
+        f"Semanal\n{width:.0f}%",
+        va="center",
+        ha="center",
+        fontsize=8,
+        color="black"
+    )
+
+    for bar in bars2:
+    width = bar.get_width()
+    ax.text(
+        width/2,
+        bar.get_y() + bar.get_height()/2,
+        f"Intermedia\n{width:.0f}%",
+        va="center",
+        ha="center",
+        fontsize=8,
+        color="black"
+    )
  
     ax.axvline(80,linestyle="--",color="black",label="Meta 80%")
  
