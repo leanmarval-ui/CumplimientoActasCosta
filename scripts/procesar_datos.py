@@ -423,7 +423,6 @@ if GRAFICO_DISPONIBLE:
 
     # TEXTO DENTRO DE LAS BARRAS
     for bar in bars1:
-        width = bar.get_width()
         ax.text(
             5,
             bar.get_y() + bar.get_height()/2,
@@ -435,7 +434,6 @@ if GRAFICO_DISPONIBLE:
         )
 
     for bar in bars2:
-        width = bar.get_width()
         ax.text(
             5,
             bar.get_y() + bar.get_height()/2,
@@ -446,12 +444,13 @@ if GRAFICO_DISPONIBLE:
             color="white"
         )
 
-    # PORCENTAJES AFUERA CON COLOR DINÁMICO
+    # PORCENTAJES AFUERA (CON COLOR DINÁMICO)
     for i, bar in enumerate(bars1):
         width = bar.get_width()
         valor = df_grafico["CumplimientoSemanal"].iloc[i]
+
         ax.text(
-            width + 1,
+            width + 2,
             bar.get_y() + bar.get_height()/2,
             f"{width:.0f}%",
             va="center",
@@ -462,8 +461,9 @@ if GRAFICO_DISPONIBLE:
     for i, bar in enumerate(bars2):
         width = bar.get_width()
         valor = df_grafico["CumplimientoIntermedia"].iloc[i]
+
         ax.text(
-            width + 1,
+            width + 2,
             bar.get_y() + bar.get_height()/2,
             f"{width:.0f}%",
             va="center",
@@ -478,7 +478,12 @@ if GRAFICO_DISPONIBLE:
     ax.set_yticks(y)
     ax.set_yticklabels(proyectos)
 
-    ax.set_xlim(0, 105)
+    # 🔥 AJUSTE DINÁMICO PARA QUE NO SE CORTE EL TEXTO
+    max_val = max(
+        df_grafico["CumplimientoSemanal"].max(),
+        df_grafico["CumplimientoIntermedia"].max()
+    )
+    ax.set_xlim(0, max_val + 15)
 
     ax.set_xlabel("Cumplimiento (%)")
     ax.set_title("Cumplimiento de Reuniones por Proyecto", fontsize=14, fontweight="bold")
