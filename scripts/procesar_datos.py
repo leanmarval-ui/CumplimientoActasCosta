@@ -329,17 +329,13 @@ comparacion["ConteoCoincidenciasSemanal"] = comparacion["Coincidencias_Semanal"]
 # CUMPLIMIENTO
 # ==================================
  
-comparacion["CumplimientoIntermedia"] = np.where(
-    comparacion["ConteoIntermedia"] == 0,
-    0,
-    comparacion["ConteoCoincidenciasIntermedia"]/comparacion["ConteoIntermedia"]
-).clip(upper=1)
+comparacion["CumplimientoIntermedia"] = (
+    comparacion["ConteoCoincidenciasIntermedia"] / comparacion["ConteoIntermedia"]
+).fillna(0).clip(upper=1)
 
-comparacion["CumplimientoSemanal"] = np.where(
-    comparacion["ConteoSemanal"] == 0,
-    0,
-    comparacion["ConteoCoincidenciasSemanal"]/comparacion["ConteoSemanal"]
-).clip(upper=1)
+comparacion["CumplimientoSemanal"] = (
+    comparacion["ConteoCoincidenciasSemanal"] / comparacion["ConteoSemanal"]
+).fillna(0).clip(upper=1)
  
 # ==================================
 # GUARDAR RESULTADOS
