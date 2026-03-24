@@ -352,27 +352,26 @@ comparacion.to_excel(salida_comparado,index=False)
 # ==================================
  
 if GRAFICO_DISPONIBLE:
- 
+
     print("Generando gráfico...")
- 
+
     df_grafico = comparacion.copy()
- 
+
     df_grafico = df_grafico[
         df_grafico["Estado"].fillna("").str.upper() == "EJECUCIÓN"
     ]
- 
+
     df_grafico["CumplimientoSemanal"] *= 100
     df_grafico["CumplimientoIntermedia"] *= 100
- 
+
     df_grafico["Promedio"] = (
         df_grafico["CumplimientoSemanal"] +
         df_grafico["CumplimientoIntermedia"]
     ) / 2
- 
+
     df_grafico = df_grafico.sort_values("Promedio")
- 
+
     def color(v):
- 
         if v < 50:
             return "#c0392b"
         elif v < 75:
@@ -381,54 +380,30 @@ if GRAFICO_DISPONIBLE:
             return "#e67e22"
         else:
             return "#27ae60"
- 
+
     proyectos = df_grafico["Proyecto"]
- 
+
     y = np.arange(len(proyectos))
     h = 0.32
- 
+
     fig, ax = plt.subplots(figsize=(13,max(6,len(proyectos)*0.6)))
- 
-   bars1 = ax.barh(
-    y-h/2,
-    df_grafico["CumplimientoSemanal"],
-    h,
-    color=[color(v) for v in df_grafico["CumplimientoSemanal"]],
-    edgecolor="none",
-    label="Reunión Semanal"
-)
- 
-    bars2 = ax.barh(
-    y+h/2,
-    df_grafico["CumplimientoIntermedia"],
-    h,
-    color=[color(v) for v in df_grafico["CumplimientoIntermedia"]],
-    edgecolor="none",
-    label="Reunión Intermedia"
-)
- 
-   for bar in bars1:
-    width = bar.get_width()
-    ax.text(
-        width/2,
-        bar.get_y() + bar.get_height()/2,
-        f"Semanal\n{width:.0f}%",
-        va="center",
-        ha="center",
-        fontsize=8,
-        color="black"
+
+    bars1 = ax.barh(
+        y-h/2,
+        df_grafico["CumplimientoSemanal"],
+        h,
+        color=[color(v) for v in df_grafico["CumplimientoSemanal"]],
+        edgecolor="none",
+        label="Reunión Semanal"
     )
 
-    for bar in bars2:
-    width = bar.get_width()
-    ax.text(
-        width/2,
-        bar.get_y() + bar.get_height()/2,
-        f"Intermedia\n{width:.0f}%",
-        va="center",
-        ha="center",
-        fontsize=8,
-        color="black"
+    bars2 = ax.barh(
+        y+h/2,
+        df_grafico["CumplimientoIntermedia"],
+        h,
+        color=[color(v) for v in df_grafico["CumplimientoIntermedia"]],
+        edgecolor="none",
+        label="Reunión Intermedia"
     )
  
     ax.axvline(80,linestyle="--",color="black",label="Meta 80%")
