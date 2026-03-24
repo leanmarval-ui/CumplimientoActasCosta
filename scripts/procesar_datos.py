@@ -371,6 +371,7 @@ if GRAFICO_DISPONIBLE:
 
     df_grafico = df_grafico.sort_values("Promedio")
 
+    # 🎨 COLOR DE BARRAS
     def color(v):
         if v < 50:
             return "#c0392b"
@@ -381,6 +382,17 @@ if GRAFICO_DISPONIBLE:
         else:
             return "#27ae60"
 
+    # 🎯 COLOR DEL TEXTO (%)
+    def color_texto(v):
+        if v < 50:
+            return "#c0392b"
+        elif v < 75:
+            return "#b7950b"
+        elif v < 90:
+            return "#d35400"
+        else:
+            return "#1e8449"
+
     proyectos = df_grafico["Proyecto"]
 
     y = np.arange(len(proyectos))
@@ -388,7 +400,7 @@ if GRAFICO_DISPONIBLE:
 
     fig, ax = plt.subplots(figsize=(13, max(6, len(proyectos)*0.6)))
 
-    # BARRAS SIN BORDE + TRANSPARENCIA
+    # BARRAS
     bars1 = ax.barh(
         y - h/2,
         df_grafico["CumplimientoSemanal"],
@@ -409,13 +421,13 @@ if GRAFICO_DISPONIBLE:
         label="Reunión Intermedia"
     )
 
-    # TEXTO DENTRO DE LAS BARRAS (IZQUIERDA, NO SE PISAN)
+    # TEXTO DENTRO DE LAS BARRAS
     for bar in bars1:
         width = bar.get_width()
         ax.text(
             5,
             bar.get_y() + bar.get_height()/2,
-            f"Semanal",
+            "Semanal",
             va="center",
             ha="left",
             fontsize=8,
@@ -427,11 +439,36 @@ if GRAFICO_DISPONIBLE:
         ax.text(
             5,
             bar.get_y() + bar.get_height()/2,
-            f"Intermedia",
+            "Intermedia",
             va="center",
             ha="left",
             fontsize=8,
             color="white"
+        )
+
+    # PORCENTAJES AFUERA CON COLOR DINÁMICO
+    for i, bar in enumerate(bars1):
+        width = bar.get_width()
+        valor = df_grafico["CumplimientoSemanal"].iloc[i]
+        ax.text(
+            width + 1,
+            bar.get_y() + bar.get_height()/2,
+            f"{width:.0f}%",
+            va="center",
+            fontsize=9,
+            color=color_texto(valor)
+        )
+
+    for i, bar in enumerate(bars2):
+        width = bar.get_width()
+        valor = df_grafico["CumplimientoIntermedia"].iloc[i]
+        ax.text(
+            width + 1,
+            bar.get_y() + bar.get_height()/2,
+            f"{width:.0f}%",
+            va="center",
+            fontsize=9,
+            color=color_texto(valor)
         )
 
     # LÍNEA META
