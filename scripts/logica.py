@@ -1,16 +1,19 @@
 import pandas as pd
 import numpy as np
 from datetime import timedelta
-import calendar
-from parametros import ANIO, MES, festivos, mapa_dias
+from parametros import festivos, mapa_dias, MES
 
+# =========================
 # LIMPIEZA
+# =========================
 def limpiar_texto(texto):
     if pd.isna(texto):
         return texto
     return str(texto).strip().upper()
 
+# =========================
 # FUNCIONES BASE
+# =========================
 def es_habil(fecha):
     if fecha.weekday() == 6:
         return False
@@ -27,7 +30,9 @@ def siguiente_habil(fecha):
         siguiente += timedelta(days=1)
     return siguiente
 
+# =========================
 # CALCULO POSIBLES
+# =========================
 def calcular_posibles(dia_base, fechas_mes):
     if pd.isna(dia_base):
         return ""
@@ -52,7 +57,9 @@ def calcular_posibles(dia_base, fechas_mes):
     posibles = sorted(set(posibles))
     return ", ".join([f.strftime("%Y-%m-%d") for f in posibles])
 
+# =========================
 # CONTEOS
+# =========================
 def contar_fechas(valor):
     if pd.isna(valor) or valor == "":
         return 0
@@ -61,7 +68,9 @@ def contar_fechas(valor):
 def contar_fechas_y_dividir(valor):
     return contar_fechas(valor) // 2
 
+# =========================
 # COINCIDENCIAS
+# =========================
 def coincidencias_inteligente(lista1, lista2):
     if pd.isna(lista1) or pd.isna(lista2):
         return ""
@@ -78,14 +87,13 @@ def coincidencias_inteligente(lista1, lista2):
                 break
 
     return ", ".join([f.strftime("%Y-%m-%d") for f in coincidencias])
-# ==================================
-# FUNCION PRINCIPAL
-# ==================================
+
+# =========================
+# PROCESO PRINCIPAL
+# =========================
 def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
 
-    # =========================
     # CALENDARIO TEORICO
-    # =========================
     df_proyectos["PosibleIntermedia"] = df_proyectos["DiaIntermedia"].apply(
         lambda x: calcular_posibles(x, fechas_mes)
     )
@@ -98,46 +106,36 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
     df_proyectos["ConteoSemanal"] = df_proyectos["PosibleSemanal"].apply(contar_fechas_y_dividir)
 
     # =========================
-    # LIMPIAR Y NORMALIZAR FECHAS
+    # DETECTAR COLUMNA DE FECHA
     # =========================
-    df_intermedia["fecha de fin"] = pd.to_datetime(df_intermedia["fecha de fin"]).dt.normalize()
-    df_semanal["fecha de fin"] = pd.to_datetime(df_semanal["fecha de fin"]).dt.normalize()
+    col_fecha_intermedia = [c for c in df_intermedia.columns if "fecha" in c.lower()][0]
+    col_fecha_semanal = [c for c in df_semanal.columns if "fecha" in c.lower()][0]
 
-    # =========================
-    # ELIMINAR DUPLICADOS POR DIA
-    # =========================
-    df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", "fecha de fin"])
-    df_semanal = df_semanal.drop_duplicates(subset=["Proyecto", "fecha de fin"])
+    # NORMALIZAR
+    df_intermedia[col_fecha_intermedia] = pd.to_datetime(df_intermedia[col_fecha_intermedia]).dt.normalize()
+    df_semanal[col_fecha_semanal] = pd.to_datetime(df_semanal[col_fecha_semanal]).dt.normalize()
 
-    # =========================
-    # AGRUPAR FECHAS REALES
-    # =========================
-    df_intermedia_group = df_intermedia.groupby("Proyecto")["fecha de fin"].apply(
+    # ELIMINAR DUPLICADOS (MISMO DIA)
+    df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", col_fecha_intermedia])
+    df_semanal = df_semanal.drop_duplicates(subset=["Proyecto", col_fecha_semanal])
+
+    # AGRUPAR
+    df_intermedia_group = df_intermedia.groupby("Proyecto")[col_fecha_intermedia].apply(
         lambda x: ", ".join(sorted(set(x.dt.strftime("%Y-%m-%d"))))
     ).reset_index()
 
-    df_semanal_group = df_semanal.groupby("Proyecto")["fecha de fin"].apply(
+    df_semanal_group = df_semanal.groupby("Proyecto")[col_fecha_semanal].apply(
         lambda x: ", ".join(sorted(set(x.dt.strftime("%Y-%m-%d"))))
     ).reset_index()
 
-    df_intermedia_group.rename(columns={"fecha de fin": "RealIntermedia"}, inplace=True)
-    df_semanal_group.rename(columns={"fecha de fin": "RealSemanal"}, inplace=True)
+    df_intermedia_group.rename(columns={col_fecha_intermedia: "RealIntermedia"}, inplace=True)
+    df_semanal_group.rename(columns={col_fecha_semanal: "RealSemanal"}, inplace=True)
 
-    # =========================
     # MERGE
-    # =========================
     comparacion = df_proyectos.merge(df_intermedia_group, on="Proyecto", how="left")
     comparacion = comparacion.merge(df_semanal_group, on="Proyecto", how="left")
 
-    # =========================
-    # MERGE
-    # =========================
-    comparacion = df_proyectos.merge(df_intermedia_group, on="Proyecto", how="left")
-    comparacion = comparacion.merge(df_semanal_group, on="Proyecto", how="left")
-
-    # =========================
     # COINCIDENCIAS
-    # =========================
     comparacion["CoincidenciasIntermedia"] = comparacion.apply(
         lambda row: coincidencias_inteligente(row["PosibleIntermedia"], row["RealIntermedia"]), axis=1
     )
@@ -149,9 +147,7 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
     comparacion["ConteoCoincidenciasIntermedia"] = comparacion["CoincidenciasIntermedia"].apply(contar_fechas)
     comparacion["ConteoCoincidenciasSemanal"] = comparacion["CoincidenciasSemanal"].apply(contar_fechas)
 
-    # =========================
     # CUMPLIMIENTO
-    # =========================
     comparacion["CumplimientoIntermedia"] = np.where(
         comparacion["ConteoIntermedia"] == 0,
         0,
@@ -164,7 +160,6 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
         comparacion["ConteoCoincidenciasSemanal"] / comparacion["ConteoSemanal"]
     )
 
-    # 🔥 evitar >100%
     comparacion["CumplimientoIntermedia"] = comparacion["CumplimientoIntermedia"].clip(upper=1)
     comparacion["CumplimientoSemanal"] = comparacion["CumplimientoSemanal"].clip(upper=1)
 
