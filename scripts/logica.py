@@ -100,17 +100,17 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
     # =========================
     # AGRUPAR REALES (QUITAR DUPLICADOS POR DIA)
     # =========================
-    df_intermedia["Fecha"] = pd.to_datetime(df_intermedia["Fecha"]).dt.normalize()
-    df_semanal["Fecha"] = pd.to_datetime(df_semanal["Fecha"]).dt.normalize()
+  df_intermedia["fecha fin"] = pd.to_datetime(df_intermedia["fecha de fin"]).dt.normalize()
+df_semanal["fecha fin"] = pd.to_datetime(df_semanal["fecha de fin"]).dt.normalize()
 
-    df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", "Fecha"])
-    df_semanal = df_semanal.drop_duplicates(subset=["Proyecto", "Fecha"])
+   df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", "fecha de fin"])
+df_semanal = df_semanal.drop_duplicates(subset=["Proyecto", "fecha de fin"])
 
-    df_intermedia_group = df_intermedia.groupby("Proyecto")["Fecha"].apply(
+    df_intermedia_group = df_intermedia.groupby("Proyecto")["fecha de fin"].apply(
         lambda x: ", ".join(sorted(set(x.dt.strftime("%Y-%m-%d"))))
     ).reset_index()
 
-    df_semanal_group = df_semanal.groupby("Proyecto")["Fecha"].apply(
+   df_semanal_group = df_semanal.groupby("Proyecto")["fecha de fin"].apply(
         lambda x: ", ".join(sorted(set(x.dt.strftime("%Y-%m-%d"))))
     ).reset_index()
 
