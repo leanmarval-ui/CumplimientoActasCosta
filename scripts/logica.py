@@ -100,8 +100,8 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
     # =========================
     # AGRUPAR REALES (QUITAR DUPLICADOS POR DIA)
     # =========================
-  df_intermedia["fecha fin"] = pd.to_datetime(df_intermedia["fecha de fin"]).dt.normalize()
-df_semanal["fecha fin"] = pd.to_datetime(df_semanal["fecha de fin"]).dt.normalize()
+  df_intermedia["fecha de fin"] = pd.to_datetime(df_intermedia["fecha de fin"]).dt.normalize()
+df_semanal["fecha de fin"] = pd.to_datetime(df_semanal["fecha de fin"]).dt.normalize()
 
    df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", "fecha de fin"])
 df_semanal = df_semanal.drop_duplicates(subset=["Proyecto", "fecha de fin"])
