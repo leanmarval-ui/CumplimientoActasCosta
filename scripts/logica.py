@@ -114,18 +114,19 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
     # NORMALIZAR
     df_intermedia[col_fecha_intermedia] = pd.to_datetime(df_intermedia[col_fecha_intermedia]).dt.normalize()
     df_semanal[col_fecha_semanal] = pd.to_datetime(df_semanal[col_fecha_semanal]).dt.normalize()
-    # =========================
-# FILTRAR SOLO MES ANALIZADO (SIN PERDER DATOS)
-# =========================
-df_intermedia = df_intermedia[
-    (df_intermedia[col_fecha_intermedia].dt.year == ANIO) &
-    (df_intermedia[col_fecha_intermedia].dt.month == MES)
-]
 
-df_semanal = df_semanal[
-    (df_semanal[col_fecha_semanal].dt.year == ANIO) &
-    (df_semanal[col_fecha_semanal].dt.month == MES)
-]
+    # =========================
+    # FILTRAR SOLO MES ANALIZADO
+    # =========================
+    df_intermedia = df_intermedia[
+        (df_intermedia[col_fecha_intermedia].dt.year == ANIO) &
+        (df_intermedia[col_fecha_intermedia].dt.month == MES)
+    ]
+
+    df_semanal = df_semanal[
+        (df_semanal[col_fecha_semanal].dt.year == ANIO) &
+        (df_semanal[col_fecha_semanal].dt.month == MES)
+    ]
 
     # ELIMINAR DUPLICADOS (MISMO DIA)
     df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", col_fecha_intermedia])
