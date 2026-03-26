@@ -34,9 +34,9 @@ fechas_mes = pd.date_range(
 print("Calculando calendario teórico...")
 
 # =========================
-# EJECUTAR LOGICA (NO TOCAR)
+# EJECUTAR LOGICA (AJUSTADO)
 # =========================
-comparacion = procesar_todo(
+comparacion, df_detallado = procesar_todo(
     df_proyectos,
     df_intermedia,
     df_semanal,
@@ -49,14 +49,19 @@ comparacion = procesar_todo(
 os.makedirs("output", exist_ok=True)
 
 # =========================
-# ✅ EXCEL COMPLETO (SIN RECORTAR)
+# ✅ EXCEL COMPLETO COMO ANTES (EL IMPORTANTE)
 # =========================
-comparacion.to_excel("output/resultados_completos.xlsx", index=False)
+df_detallado.to_excel("output/calendario_comparado.xlsx", index=False)
 
-print("Excel completo generado")
+print("Excel detallado generado (como antes)")
 
 # =========================
-# ARCHIVOS ADICIONALES (SIN AFECTAR EL PRINCIPAL)
+# (OPCIONAL) RESUMEN
+# =========================
+comparacion.to_excel("output/resumen.xlsx", index=False)
+
+# =========================
+# ARCHIVOS ADICIONALES
 # =========================
 
 # TEORICO
@@ -73,21 +78,12 @@ comparacion[[
     "RealSemanal"
 ]].to_excel("output/calendario_real.xlsx", index=False)
 
-# COMPARADO
-comparacion[[
-    "Proyecto",
-    "CoincidenciasIntermedia",
-    "CoincidenciasSemanal",
-    "CumplimientoIntermedia",
-    "CumplimientoSemanal"
-]].to_excel("output/calendario_comparado.xlsx", index=False)
-
 print("Calendarios generados")
 
 # =========================
-# 🔥 GRAFICO (FORZAR ACTUALIZACION)
+# 🔥 GRAFICO
 # =========================
-generar_grafico(comparacion.copy())
+generar_grafico(comparacion)
 
 print("Gráfico actualizado")
 
