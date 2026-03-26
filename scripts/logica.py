@@ -78,3 +78,82 @@ def coincidencias_inteligente(lista1, lista2):
                 break
 
     return ", ".join([f.strftime("%Y-%m-%d") for f in coincidencias])
+# ==================================
+# FUNCION PRINCIPAL
+# ==================================
+def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
+
+    # =========================
+    # CALENDARIO TEORICO
+    # =========================
+    df_proyectos["PosibleIntermedia"] = df_proyectos["DiaIntermedia"].apply(
+        lambda x: calcular_posibles(x, fechas_mes)
+    )
+
+    df_proyectos["PosibleSemanal"] = df_proyectos["DiaSemanal"].apply(
+        lambda x: calcular_posibles(x, fechas_mes)
+    )
+
+    df_proyectos["ConteoIntermedia"] = df_proyectos["PosibleIntermedia"].apply(contar_fechas_y_dividir)
+    df_proyectos["ConteoSemanal"] = df_proyectos["PosibleSemanal"].apply(contar_fechas_y_dividir)
+
+    # =========================
+    # AGRUPAR REALES (QUITAR DUPLICADOS POR DIA)
+    # =========================
+    df_intermedia["Fecha"] = pd.to_datetime(df_intermedia["Fecha"]).dt.normalize()
+    df_semanal["Fecha"] = pd.to_datetime(df_semanal["Fecha"]).dt.normalize()
+
+    df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", "Fecha"])
+    df_semanal = df_semanal.drop_duplicates(subset=["Proyecto", "Fecha"])
+
+    df_intermedia_group = df_intermedia.groupby("Proyecto")["Fecha"].apply(
+        lambda x: ", ".join(sorted(set(x.dt.strftime("%Y-%m-%d"))))
+    ).reset_index()
+
+    df_semanal_group = df_semanal.groupby("Proyecto")["Fecha"].apply(
+        lambda x: ", ".join(sorted(set(x.dt.strftime("%Y-%m-%d"))))
+    ).reset_index()
+
+    df_intermedia_group.rename(columns={"Fecha": "RealIntermedia"}, inplace=True)
+    df_semanal_group.rename(columns={"Fecha": "RealSemanal"}, inplace=True)
+
+    # =========================
+    # MERGE
+    # =========================
+    comparacion = df_proyectos.merge(df_intermedia_group, on="Proyecto", how="left")
+    comparacion = comparacion.merge(df_semanal_group, on="Proyecto", how="left")
+
+    # =========================
+    # COINCIDENCIAS
+    # =========================
+    comparacion["CoincidenciasIntermedia"] = comparacion.apply(
+        lambda row: coincidencias_inteligente(row["PosibleIntermedia"], row["RealIntermedia"]), axis=1
+    )
+
+    comparacion["CoincidenciasSemanal"] = comparacion.apply(
+        lambda row: coincidencias_inteligente(row["PosibleSemanal"], row["RealSemanal"]), axis=1
+    )
+
+    comparacion["ConteoCoincidenciasIntermedia"] = comparacion["CoincidenciasIntermedia"].apply(contar_fechas)
+    comparacion["ConteoCoincidenciasSemanal"] = comparacion["CoincidenciasSemanal"].apply(contar_fechas)
+
+    # =========================
+    # CUMPLIMIENTO
+    # =========================
+    comparacion["CumplimientoIntermedia"] = np.where(
+        comparacion["ConteoIntermedia"] == 0,
+        0,
+        comparacion["ConteoCoincidenciasIntermedia"] / comparacion["ConteoIntermedia"]
+    )
+
+    comparacion["CumplimientoSemanal"] = np.where(
+        comparacion["ConteoSemanal"] == 0,
+        0,
+        comparacion["ConteoCoincidenciasSemanal"] / comparacion["ConteoSemanal"]
+    )
+
+    # 🔥 evitar >100%
+    comparacion["CumplimientoIntermedia"] = comparacion["CumplimientoIntermedia"].clip(upper=1)
+    comparacion["CumplimientoSemanal"] = comparacion["CumplimientoSemanal"].clip(upper=1)
+
+    return comparacion
