@@ -30,24 +30,24 @@ def generar_grafico(comparacion):
 
     df_grafico = df_grafico.sort_values("Promedio")
 
+     # =========================
+    # COLORES (3 RANGOS)
     # =========================
-    # COLORES
-    # =========================
-   def color(v):
-    if v >= 90:
-        return "#27ae60"  # verde
-    elif v >= 80:
-        return "#f1c40f"  # amarillo
-    else:
-        return "#c0392b"  # rojo
+    def color(v):
+        if v >= 90:
+            return "#27ae60"  # verde
+        elif v >= 80:
+            return "#f1c40f"  # amarillo
+        else:
+            return "#c0392b"  # rojo
 
-def color_texto(v):
-    if v >= 90:
-        return "#1e8449"
-    elif v >= 80:
-        return "#b7950b"
-    else:
-        return "#922b21"
+    def color_texto(v):
+        if v >= 90:
+            return "#1e8449"
+        elif v >= 80:
+            return "#b7950b"
+        else:
+            return "#922b21"
 
     proyectos = df_grafico["Proyecto"]
 
