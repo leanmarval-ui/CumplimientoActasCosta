@@ -33,25 +33,21 @@ def generar_grafico(comparacion):
     # =========================
     # COLORES
     # =========================
-    def color(v):
-        if v < 50:
-            return "#c0392b"
-        elif v < 75:
-            return "#f1c40f"
-        elif v < 90:
-            return "#e67e22"
-        else:
-            return "#27ae60"
+   def color(v):
+    if v >= 90:
+        return "#27ae60"  # verde
+    elif v >= 80:
+        return "#f1c40f"  # amarillo
+    else:
+        return "#c0392b"  # rojo
 
-    def color_texto(v):
-        if v < 50:
-            return "#c0392b"
-        elif v < 75:
-            return "#b7950b"
-        elif v < 90:
-            return "#d35400"
-        else:
-            return "#1e8449"
+def color_texto(v):
+    if v >= 90:
+        return "#1e8449"
+    elif v >= 80:
+        return "#b7950b"
+    else:
+        return "#922b21"
 
     proyectos = df_grafico["Proyecto"]
 
