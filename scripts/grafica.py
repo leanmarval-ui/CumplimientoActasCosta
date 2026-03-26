@@ -1,56 +1,76 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
-def color(v):
-    if v < 80:
-        return "#c0392b"
-    elif v < 90:
-        return "#f1c40f"
-    else:
-        return "#27ae60"
+def generar_grafico(comparacion):
 
-def generar_grafico(df):
+    proyectos = comparacion["Proyecto"]
+    intermedia = comparacion["CumplimientoIntermedia"]
+    semanal = comparacion["CumplimientoSemanal"]
 
-    df = df[df["Estado"].fillna("").str.upper() == "EJECUCIÓN"]
-
-    df["CumplimientoSemanal"] *= 100
-    df["CumplimientoIntermedia"] *= 100
-
-    df["Promedio"] = (df["CumplimientoSemanal"] + df["CumplimientoIntermedia"]) / 2
-    df = df.sort_values("Promedio")
-
-    proyectos = df["Proyecto"]
     y = np.arange(len(proyectos))
-    h = 0.32
+    altura = 0.4
 
-    fig, ax = plt.subplots(figsize=(13, max(6, len(proyectos)*0.6)))
+    plt.figure(figsize=(12,6))
 
-    bars1 = ax.barh(y-h/2, df["CumplimientoSemanal"], h,
-                    color=[color(v) for v in df["CumplimientoSemanal"]],
-                    edgecolor="none", label="Semanal")
+    # =========================
+    # FUNCION DE COLORES
+    # =========================
+    def color(valor):
+        if valor >= 0.9:
+            return "green"
+        elif valor >= 0.8:
+            return "gold"
+        else:
+            return "red"
 
-    bars2 = ax.barh(y+h/2, df["CumplimientoIntermedia"], h,
-                    color=[color(v) for v in df["CumplimientoIntermedia"]],
-                    edgecolor="none", label="Intermedia")
+    colores_intermedia = [color(v) for v in intermedia]
+    colores_semanal = [color(v) for v in semanal]
 
-    for bar in bars1:
-        ax.text(5, bar.get_y()+bar.get_height()/2, "Semanal", va="center", color="white", fontsize=8)
+    # =========================
+    # BARRAS
+    # =========================
+    plt.barh(y - altura/2, intermedia, height=altura, color=colores_intermedia)
+    plt.barh(y + altura/2, semanal, height=altura, color=colores_semanal)
 
-    for bar in bars2:
-        ax.text(5, bar.get_y()+bar.get_height()/2, "Intermedia", va="center", color="white", fontsize=8)
+    plt.yticks(y, proyectos)
 
-    for bars in [bars1, bars2]:
-        for bar in bars:
-            width = bar.get_width()
-            ax.text(width+2, bar.get_y()+bar.get_height()/2, f"{width:.0f}%", va="center")
+    # =========================
+    # LINEA META
+    # =========================
+    plt.axvline(x=0.8, color='black', linestyle='--', label='Meta 80%')
 
-    ax.axvline(80, linestyle="--", color="black")
+    # =========================
+    # TITULO
+    # =========================
+    plt.title("Cumplimiento de Reuniones por Proyecto", fontsize=14, fontweight='bold')
 
-    ax.set_yticks(y)
-    ax.set_yticklabels(proyectos)
+    # =========================
+    # TEXTO DENTRO DE BARRAS
+    # =========================
+    for i, v in enumerate(intermedia):
+        if v > 0.05:  # evitar que se vea feo si es muy pequeño
+            plt.text(v/2, i - altura/2, f"Intermedia\n{v:.0%}", 
+                     va='center', ha='center', color='white', fontsize=8, fontweight='bold')
 
-    ax.set_xlim(0, df[["CumplimientoSemanal","CumplimientoIntermedia"]].max().max() + 15)
+    for i, v in enumerate(semanal):
+        if v > 0.05:
+            plt.text(v/2, i + altura/2, f"Semanal\n{v:.0%}", 
+                     va='center', ha='center', color='white', fontsize=8, fontweight='bold')
+
+    # =========================
+    # FORMATO
+    # =========================
+    plt.xlim(0, 1)
+    plt.xlabel("Cumplimiento")
+    plt.legend()
 
     plt.tight_layout()
-    plt.savefig("output/grafico_cumplimiento_proyectos.png", dpi=300)
+
+    # =========================
+    # GUARDAR
+    # =========================
+    os.makedirs("output", exist_ok=True)
+    plt.savefig("output/grafico.png")
+
     plt.close()
