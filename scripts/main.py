@@ -34,7 +34,7 @@ fechas_mes = pd.date_range(
 print("Calculando calendario teórico...")
 
 # =========================
-# EJECUTAR LOGICA COMPLETA
+# EJECUTAR LOGICA (NO TOCAR)
 # =========================
 comparacion = procesar_todo(
     df_proyectos,
@@ -44,58 +44,51 @@ comparacion = procesar_todo(
 )
 
 # =========================
-# CREAR CARPETA OUTPUT
+# CREAR OUTPUT
 # =========================
 os.makedirs("output", exist_ok=True)
 
 # =========================
-# EXPORTAR EXCEL GENERAL
+# ✅ EXCEL COMPLETO (SIN RECORTAR)
 # =========================
-ruta_excel = f"output/resultados_{ANIO}_{MES:02d}.xlsx"
-comparacion.to_excel(ruta_excel, index=False)
+comparacion.to_excel("output/resultados_completos.xlsx", index=False)
 
-print(f"Excel general generado: {ruta_excel}")
+print("Excel completo generado")
 
 # =========================
-# EXPORTAR CALENDARIOS
+# ARCHIVOS ADICIONALES (SIN AFECTAR EL PRINCIPAL)
 # =========================
 
-# CALENDARIO TEÓRICO
-df_teorico = comparacion[[
+# TEORICO
+comparacion[[
     "Proyecto",
     "PosibleIntermedia",
     "PosibleSemanal"
-]]
-df_teorico.to_excel("output/calendario_teorico.xlsx", index=False)
+]].to_excel("output/calendario_teorico.xlsx", index=False)
 
-# CALENDARIO REAL
-df_real = comparacion[[
+# REAL
+comparacion[[
     "Proyecto",
     "RealIntermedia",
     "RealSemanal"
-]]
-df_real.to_excel("output/calendario_real.xlsx", index=False)
+]].to_excel("output/calendario_real.xlsx", index=False)
 
-# CALENDARIO COMPARADO
-df_comparado = comparacion[[
+# COMPARADO
+comparacion[[
     "Proyecto",
     "CoincidenciasIntermedia",
     "CoincidenciasSemanal",
     "CumplimientoIntermedia",
     "CumplimientoSemanal"
-]]
-df_comparado.to_excel("output/calendario_comparado.xlsx", index=False)
+]].to_excel("output/calendario_comparado.xlsx", index=False)
 
-print("Archivos de calendario generados")
-
-# =========================
-# GENERAR GRAFICO
-# =========================
-generar_grafico(comparacion)
-
-print("Gráfico generado")
+print("Calendarios generados")
 
 # =========================
-# FIN
+# 🔥 GRAFICO (FORZAR ACTUALIZACION)
 # =========================
+generar_grafico(comparacion.copy())
+
+print("Gráfico actualizado")
+
 print("Proceso finalizado correctamente ✅")
