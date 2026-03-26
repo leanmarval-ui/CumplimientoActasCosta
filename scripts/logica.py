@@ -98,24 +98,36 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
     df_proyectos["ConteoSemanal"] = df_proyectos["PosibleSemanal"].apply(contar_fechas_y_dividir)
 
     # =========================
-    # AGRUPAR REALES (QUITAR DUPLICADOS POR DIA)
+    # LIMPIAR Y NORMALIZAR FECHAS
     # =========================
-  df_intermedia["fecha de fin"] = pd.to_datetime(df_intermedia["fecha de fin"]).dt.normalize()
-df_semanal["fecha de fin"] = pd.to_datetime(df_semanal["fecha de fin"]).dt.normalize()
+    df_intermedia["fecha de fin"] = pd.to_datetime(df_intermedia["fecha de fin"]).dt.normalize()
+    df_semanal["fecha de fin"] = pd.to_datetime(df_semanal["fecha de fin"]).dt.normalize()
 
-   df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", "fecha de fin"])
-df_semanal = df_semanal.drop_duplicates(subset=["Proyecto", "fecha de fin"])
+    # =========================
+    # ELIMINAR DUPLICADOS POR DIA
+    # =========================
+    df_intermedia = df_intermedia.drop_duplicates(subset=["Proyecto", "fecha de fin"])
+    df_semanal = df_semanal.drop_duplicates(subset=["Proyecto", "fecha de fin"])
 
+    # =========================
+    # AGRUPAR FECHAS REALES
+    # =========================
     df_intermedia_group = df_intermedia.groupby("Proyecto")["fecha de fin"].apply(
         lambda x: ", ".join(sorted(set(x.dt.strftime("%Y-%m-%d"))))
     ).reset_index()
 
-   df_semanal_group = df_semanal.groupby("Proyecto")["fecha de fin"].apply(
+    df_semanal_group = df_semanal.groupby("Proyecto")["fecha de fin"].apply(
         lambda x: ", ".join(sorted(set(x.dt.strftime("%Y-%m-%d"))))
     ).reset_index()
 
-    df_intermedia_group.rename(columns={"Fecha": "RealIntermedia"}, inplace=True)
-    df_semanal_group.rename(columns={"Fecha": "RealSemanal"}, inplace=True)
+    df_intermedia_group.rename(columns={"fecha de fin": "RealIntermedia"}, inplace=True)
+    df_semanal_group.rename(columns={"fecha de fin": "RealSemanal"}, inplace=True)
+
+    # =========================
+    # MERGE
+    # =========================
+    comparacion = df_proyectos.merge(df_intermedia_group, on="Proyecto", how="left")
+    comparacion = comparacion.merge(df_semanal_group, on="Proyecto", how="left")
 
     # =========================
     # MERGE
