@@ -66,7 +66,9 @@ def contar_fechas(valor):
     return len([x for x in str(valor).split(",") if x.strip() != ""])
 
 def contar_fechas_y_dividir(valor):
-    return contar_fechas(valor) // 2
+    if pd.isna(valor) or valor == "":
+        return 0
+    return len([x for x in str(valor).split(",") if x.strip() != ""]) / 2
 
 # =========================
 # COINCIDENCIAS
@@ -102,8 +104,8 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
         lambda x: calcular_posibles(x, fechas_mes)
     )
 
-    df_proyectos["ConteoIntermedia"] = df_proyectos["PosibleIntermedia"].apply(contar_fechas)
-    df_proyectos["ConteoSemanal"] = df_proyectos["PosibleSemanal"].apply(contar_fechas)
+    df_proyectos["ConteoIntermedia"] = df_proyectos["PosibleIntermedia"].apply(contar_fechas_y_dividir)
+    df_proyectos["ConteoSemanal"] = df_proyectos["PosibleSemanal"].apply(contar_fechas_y_dividir)
    
     # =========================
     # DETECTAR COLUMNA DE FECHA
