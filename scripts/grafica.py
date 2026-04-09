@@ -30,16 +30,16 @@ def generar_grafico(comparacion):
 
     df_grafico = df_grafico.sort_values("Promedio")
 
-     # =========================
-    # COLORES (3 RANGOS)
+    # =========================
+    # COLORES
     # =========================
     def color(v):
         if v >= 90:
-            return "#27ae60"  # verde
+            return "#27ae60"
         elif v >= 80:
-            return "#f1c40f"  # amarillo
+            return "#f1c40f"
         else:
-            return "#c0392b"  # rojo
+            return "#c0392b"
 
     def color_texto(v):
         if v >= 90:
@@ -55,12 +55,12 @@ def generar_grafico(comparacion):
     h = 0.32
 
     # =========================
-    # FIGURA DINÁMICA
+    # FIGURA
     # =========================
     fig, ax = plt.subplots(figsize=(13, max(6, len(proyectos)*0.6)))
 
     # =========================
-    # BARRAS
+    # BARRAS (SIN LABEL)
     # =========================
     bars1 = ax.barh(
         y - h/2,
@@ -68,8 +68,7 @@ def generar_grafico(comparacion):
         h,
         color=[color(v) for v in df_grafico["CumplimientoSemanal"]],
         edgecolor="none",
-        alpha=0.85,
-        label="Reunión Semanal"
+        alpha=0.85
     )
 
     bars2 = ax.barh(
@@ -78,12 +77,11 @@ def generar_grafico(comparacion):
         h,
         color=[color(v) for v in df_grafico["CumplimientoIntermedia"]],
         edgecolor="none",
-        alpha=0.85,
-        label="Reunión Intermedia"
+        alpha=0.85
     )
 
     # =========================
-    # TEXTO DENTRO (TIPO)
+    # TEXTO DENTRO
     # =========================
     for bar in bars1:
         ax.text(
@@ -93,7 +91,8 @@ def generar_grafico(comparacion):
             va="center",
             ha="left",
             fontsize=8,
-            color="white"
+            color="white",
+            fontweight="bold"
         )
 
     for bar in bars2:
@@ -104,7 +103,8 @@ def generar_grafico(comparacion):
             va="center",
             ha="left",
             fontsize=8,
-            color="white"
+            color="white",
+            fontweight="bold"
         )
 
     # =========================
@@ -137,9 +137,10 @@ def generar_grafico(comparacion):
         )
 
     # =========================
-    # META
+    # META (ÚNICA LEYENDA)
     # =========================
-    ax.axvline(80, linestyle="--", color="black", label="Meta 80%")
+    ax.axvline(80, linestyle="--", linewidth=2, color="black", label="Meta 80%")
+    ax.legend(["Meta 80%"])
 
     # =========================
     # EJES
@@ -158,8 +159,6 @@ def generar_grafico(comparacion):
     ax.set_title("Cumplimiento de Reuniones por Proyecto", fontsize=14, fontweight="bold")
 
     ax.grid(axis="x", linestyle="--", alpha=0.4)
-
-    ax.legend()
 
     plt.tight_layout()
 
