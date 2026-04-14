@@ -169,7 +169,9 @@ fetch('https://leanmarval-ui.github.io/CumplimientoActasBquilla/output/detalle.j
 .then(res => res.json())
 .then(data => {
 
-    datosGlobal = data.filter(d => d.sucursal === "barranquilla");
+    datosGlobal = data.filter(d => 
+    d.sucursal && d.sucursal.toString().trim().toLowerCase() === "barranquilla"
+    );
 
     // 🔥 LLENAR DESPLEGABLE
     let proyectosUnicos = [...new Set(datosGlobal.map(d => d.proyecto))];
@@ -276,10 +278,6 @@ function renderTabla(data){
 }
 
 // ================= BUSCADOR =================
-let buscador = document.getElementById("buscador");
-
-buscador.addEventListener("input", filtrarTabla);
-buscador.addEventListener("change", filtrarTabla);
 
 function filtrarTabla(){
 
