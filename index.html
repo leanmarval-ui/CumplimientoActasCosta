@@ -169,7 +169,7 @@ fetch('https://leanmarval-ui.github.io/CumplimientoActasBquilla/output/detalle.j
 .then(res => res.json())
 .then(data => {
 
-    datosGlobal = data.filter(d => d.sucursal === "bucaramanga");
+    datosGlobal = data.filter(d => d.sucursal === "barranquilla");
 
     // 🔥 LLENAR DESPLEGABLE
     let proyectosUnicos = [...new Set(datosGlobal.map(d => d.proyecto))];
