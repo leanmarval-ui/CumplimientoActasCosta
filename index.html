@@ -52,13 +52,20 @@ h1 {
     margin: 10px;
 }
 
-/* COLORES */
+/* COLORES KPI */
 .kpi:nth-child(2) { border-top: 5px solid #27ae60; }
 .kpi:nth-child(3) { border-top: 5px solid #f1c40f; }
 .kpi:nth-child(4) { border-top: 5px solid #c0392b; }
 
-.kpi h2 { margin: 0; }
-.kpi p { color: #666; }
+.kpi h2 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.kpi p {
+    margin: 5px 0 0;
+    color: #666;
+}
 
 /* BUSCADOR */
 .buscador {
@@ -69,22 +76,30 @@ h1 {
 input {
     padding: 10px;
     width: 300px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
-/* GRAFICO */
-.card.grafico {
+/* CARD */
+.card {
     background: white;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     text-align: center;
-    max-width: 1200px;
+    max-width: 800px;
     margin: auto;
 }
 
 img {
     width: 100%;
     max-height: 600px;
+    object-fit: contain;
+}
+
+.card.grafico {
+    max-width: 1200px;
+    width: 95%;
 }
 
 /* TABLA */
@@ -93,6 +108,7 @@ table {
     border-collapse: collapse;
     background: white;
     width: 95%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 th {
@@ -110,66 +126,60 @@ td {
 
 <body>
 
-<div id="splash">🚀 Cargando Dashboard...</div>
+<div id="splash">
+    🚀 Cargando Dashboard...
+</div>
 
 <div class="contenido" id="contenido">
 
 <h1>📊 Cumplimiento de Actas - Barranquilla</h1>
 
+<!-- KPI -->
 <div class="kpi-container" id="kpis"></div>
 
+<!-- BUSCADOR -->
 <div class="buscador">
     <input list="listaProyectos" id="buscador" placeholder="Buscar proyecto...">
     <datalist id="listaProyectos"></datalist>
 </div>
 
+<!-- GRAFICA -->
 <div class="card grafico">
     <img src="https://leanmarval-ui.github.io/CumplimientoActasBquilla/output/grafico.png">
 </div>
 
+<!-- TABLA -->
 <div id="tabla-container" style="margin-top:40px;"></div>
 
 </div>
 
 <script>
 setTimeout(() => {
-    splash.style.display = "none";
-    contenido.style.display = "block";
+    document.getElementById("splash").style.display = "none";
+    document.getElementById("contenido").style.display = "block";
 }, 1500);
+</script>
+
+<script>
 
 let datosGlobal = [];
-let buscador = document.getElementById("buscador");
 
 fetch('https://leanmarval-ui.github.io/CumplimientoActasBquilla/output/detalle.json')
 .then(res => res.json())
 .then(data => {
 
-    datosGlobal = data.filter(d =>
-        d.sucursal && d.sucursal.toLowerCase() === "barranquilla"
+    datosGlobal = data.filter(d => 
+        d.sucursal && d.sucursal.toString().trim().toLowerCase() === "barranquilla"
     );
 
-    // desplegable
-    let proyectos = [...new Set(datosGlobal.map(d => d.proyecto))];
-    listaProyectos.innerHTML = proyectos.map(p => `<option value="${p}">`).join("");
+    // DESPLEGABLE
+    let proyectosUnicos = [...new Set(datosGlobal.map(d => d.proyecto))];
+    let opciones = proyectosUnicos.map(p => `<option value="${p}">`).join("");
+    document.getElementById("listaProyectos").innerHTML = opciones;
 
     generarKPIs(datosGlobal);
     renderTabla(datosGlobal);
 });
-
-// ================= FILTRO =================
-buscador.addEventListener("input", filtrarTabla);
-buscador.addEventListener("change", filtrarTabla);
-
-function filtrarTabla(){
-    let texto = buscador.value.toLowerCase();
-
-    let filtrado = datosGlobal.filter(d =>
-        d.proyecto.toLowerCase().includes(texto)
-    );
-
-    renderTabla(filtrado);
-    generarKPIs(filtrado);
-}
 
 // ================= KPI =================
 function generarKPIs(data){
@@ -186,24 +196,27 @@ function generarKPIs(data){
     let amarillos = cumplimientos.filter(v => v >= 80 && v < 90).length;
     let rojos = cumplimientos.filter(v => v < 80).length;
 
-    kpis.innerHTML = `
-        <div class="kpi">
-            <h2>${promedio.toFixed(0)}%</h2>
-            <p>Promedio</p>
-        </div>
-        <div class="kpi">
-            <h2>${verdes}</h2>
-            <p>Cumplimiento Óptimo (≥90%)</p>
-        </div>
-        <div class="kpi">
-            <h2>${amarillos}</h2>
-            <p>Cumplimiento Medio (80–89%)</p>
-        </div>
-        <div class="kpi">
-            <h2>${rojos}</h2>
-            <p>Cumplimiento Crítico (&lt;80%)</p>
-        </div>
-    `;
+   document.getElementById("kpis").innerHTML = `
+    <div class="kpi">
+        <h2>${promedio.toFixed(0)}%</h2>
+        <p>Promedio</p>
+    </div>
+
+    <div class="kpi">
+        <h2>${verdes}</h2>
+        <p>Cumplimiento Óptimo (≥90%)</p>
+    </div>
+
+    <div class="kpi">
+        <h2>${amarillos}</h2>
+        <p>Cumplimiento Medio (80–89%)</p>
+    </div>
+
+    <div class="kpi">
+        <h2>${rojos}</h2>
+        <p>Cumplimiento Crítico (&lt;80%)</p>
+    </div>
+`;
 }
 
 // ================= TABLA =================
@@ -247,8 +260,28 @@ function renderTabla(data){
     });
 
     html += "</table>";
-    tabla-container.innerHTML = html;
+
+    document.getElementById("tabla-container").innerHTML = html;
 }
+
+// ================= BUSCADOR =================
+let buscador = document.getElementById("buscador");
+
+buscador.addEventListener("input", filtrarTabla);
+buscador.addEventListener("change", filtrarTabla);
+
+function filtrarTabla(){
+
+    let texto = buscador.value.toLowerCase();
+
+    let filtrado = datosGlobal.filter(d =>
+        d.proyecto.toLowerCase().includes(texto)
+    );
+
+    renderTabla(filtrado);
+    generarKPIs(filtrado);
+}
+
 </script>
 
 </body>
