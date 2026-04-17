@@ -133,7 +133,7 @@
 
 <div class="contenido" id="contenido">
 
-<h1>📊 Cumplimiento de Actas - Bucaramanga</h1>
+<h1>📊 Cumplimiento de Actas - Barranquilla</h1>
 
 <!-- KPI -->
 <div class="kpi-container" id="kpis"></div>
@@ -146,7 +146,7 @@
 
 <!-- GRAFICA -->
 <div class="card grafico">
-    <img src="https://leanmarval-ui.github.io/CumplimientoActasBucaramanga/output/grafico.png">
+    <img src="https://leanmarval-ui.github.io/CumplimientoActasBquilla/output/grafico.png">
 </div>
 
 <!-- TABLA -->
@@ -165,11 +165,11 @@ setTimeout(() => {
 
 let datosGlobal = [];
 
-fetch('https://leanmarval-ui.github.io/CumplimientoActasBucaramanga/output/detalle.json')
+fetch('https://leanmarval-ui.github.io/CumplimientoActasBquilla/output/detalle.json')
 .then(res => res.json())
 .then(data => {
 
-    datosGlobal = data.filter(d => d.sucursal === "bucaramanga");
+    datosGlobal = data.filter(d => d.sucursal === "barranquilla");
 
     // 🔥 LLENAR DESPLEGABLE
     let proyectosUnicos = [...new Set(datosGlobal.map(d => d.proyecto))];
