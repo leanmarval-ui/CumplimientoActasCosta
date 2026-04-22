@@ -148,12 +148,41 @@ def procesar_todo(df_proyectos, df_intermedia, df_semanal, fechas_mes):
     # =========================
     # DETECTAR COLUMNA DE FECHA
     # =========================
-    col_fecha_intermedia = [c for c in df_intermedia.columns if "fecha" in c.lower()][0]
-    col_fecha_semanal = [c for c in df_semanal.columns if "fecha" in c.lower()][0]
+    col_fecha_intermedia = "Fecha de Fin" if "Fecha de Fin" in df_intermedia.columns else [c for c in df_intermedia.columns if "fecha" in c.lower()][0]
+    col_fecha_semanal = "Fecha de Fin" if "Fecha de Fin" in df_semanal.columns else [c for c in df_semanal.columns if "fecha" in c.lower()][0]
 
     # NORMALIZAR
-    df_intermedia[col_fecha_intermedia] = pd.to_datetime(df_intermedia[col_fecha_intermedia]).dt.normalize()
-    df_semanal[col_fecha_semanal] = pd.to_datetime(df_semanal[col_fecha_semanal]).dt.normalize()
+    df_intermedia[col_fecha_intermedia] = pd.to_datetime(
+        df_intermedia[col_fecha_intermedia],
+        errors="coerce"
+    ).dt.normalize()
+
+    df_semanal[col_fecha_semanal] = pd.to_datetime(
+        df_semanal[col_fecha_semanal],
+        errors="coerce"
+    ).dt.normalize()
+
+    df_intermedia = df_intermedia.dropna(subset=[col_fecha_intermedia])
+    df_semanal = df_semanal.dropna(subset=[col_fecha_semanal])
+
+    # =========================
+    # 🔥 AJUSTE DE FECHA DE CIERRE REAL (FIX PLATAFORMA)
+    # =========================
+
+    df_intermedia[col_fecha_intermedia] = pd.to_datetime(df_intermedia[col_fecha_intermedia], errors="coerce")
+    df_semanal[col_fecha_semanal] = pd.to_datetime(df_semanal[col_fecha_semanal], errors="coerce")
+
+    df_intermedia["FechaCierreAjustada"] = np.where(
+        df_intermedia[col_fecha_intermedia].dt.date > df_intermedia.groupby("Proyecto")[col_fecha_intermedia].transform("min").dt.date,
+        (df_intermedia[col_fecha_intermedia] + pd.Timedelta(days=1)).dt.normalize(),
+        df_intermedia[col_fecha_intermedia].dt.normalize()
+    )
+
+    df_semanal["FechaCierreAjustada"] = np.where(
+        df_semanal[col_fecha_semanal].dt.date > df_semanal.groupby("Proyecto")[col_fecha_semanal].transform("min").dt.date,
+        (df_semanal[col_fecha_semanal] + pd.Timedelta(days=1)).dt.normalize(),
+        df_semanal[col_fecha_semanal].dt.normalize()
+    )
 
     # =========================
     # FILTRAR SOLO MES ANALIZADO
